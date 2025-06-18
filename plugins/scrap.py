@@ -31,6 +31,10 @@ def run(url: str, logger= None):
         page.goto(url)
         page.wait_for_load_state("networkidle")
         logger.info(f"Page title: {page.title()}")
+        html = page.content()
+        with open("debug_facebook.html", "w", encoding="utf-8") as f:
+            f.write(html)
+            f.close()
         page.wait_for_selector("div[data-pagelet^='TimelineFeedUnit_']")
         image_locator = page.locator("a[href*='https://www.facebook.com/photo/?fbid=']").nth(1)
         # print(h.inner_html())

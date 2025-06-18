@@ -51,14 +51,13 @@ def run(url: str, logger) -> bytes:
         context = fb_login(page=page, context=context, logger= logger)
         page.goto(url)
         page.wait_for_load_state("networkidle")
-        # html = page.content()
-        # with open("/home/ubuntu/debug_facebook.html", "w", encoding="utf-8") as f:
-        #     f.write(html)
-        #     f.close()
         page.wait_for_selector("div[data-pagelet^='TimelineFeedUnit_']")
-        image_locator = page.locator("img[alt*='May be']").nth(0)
+        feed = page.locator("div[data-pagelet^='TimelineFeedUnit_']") # Select the feed
+        image_locator = feed.locator("a[href*='https://www.facebook.com/photo/?fbid=']").nth(0).get_attribute('href') # Link to the first image publication
+        page.goto(image_locator)
+        page.wait_for_load_state("networkidle")
+        src_url = page.locator("img[alt*='May be an image of text that says']").nth(0).get_attribute('src') # Link to the first image
         # print(c)
-        src_url = image_locator.get_attribute('src')
         logger.info(f"Getting image response from {src_url}")
         response = context.request.get(src_url)
         image_bytes = response.body()

@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright, Page
 import os
+import time
 
 def fb_login(page: Page, context, logger):
     page.goto("https://www.facebook.com/login")
@@ -10,6 +11,7 @@ def fb_login(page: Page, context, logger):
     page.fill('input[name="pass"]', FB_PASSWORD)
     page.click('button[name="login"]')
     logger.info("Waiting for Facebook to load after login")
+    time.sleep(4)  # Esperar un poco para que la página cargue después del login
     # Esperar a que cargue algo del perfil
     # page.wait_for_selector('[role="navigation"]', timeout=10000)
 

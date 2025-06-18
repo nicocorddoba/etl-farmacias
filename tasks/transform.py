@@ -8,7 +8,7 @@ from io import BytesIO
 
 def image_to_text(image_bytes, logger):
     # Abrir imagen
-    logger.info(f"Converting image to text {image_bytes}")
+    # logger.info(f"Converting image to text {image_bytes}")
     img = Image.open(BytesIO(image_bytes)).convert("RGB")  # Asegurate que esté en modo RGB
 
     # Crear una nueva imagen blanca del mismo tamaño
@@ -37,6 +37,7 @@ def image_to_text(image_bytes, logger):
     # OCR
     custom_config = r'--oem 3 --psm 6'  # o --psm 4/11 también puede probarse
     text = pytesseract.image_to_string(imagen, lang="spa", config=custom_config)
+    logger.info(f"Extracted text: {text}")
     return text
 
 @task

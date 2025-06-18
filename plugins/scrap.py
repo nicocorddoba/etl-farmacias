@@ -43,7 +43,7 @@ def run(url: str, logger, FB_EMAIL: str, FB_PASSWORD: str) -> bytes:
         chromium = playwright.chromium
         context, browser = launch_browser(chromium=chromium)
         page = context.new_page()
-        fb_login(page=page, context=context, FB_EMAIL=FB_EMAIL, FB_PASSWORD=FB_PASSWORD)
+        context = fb_login(page=page, context=context, FB_EMAIL=FB_EMAIL, FB_PASSWORD=FB_PASSWORD)
         page.goto(url)
         page.wait_for_load_state("networkidle")
         # html = page.content()

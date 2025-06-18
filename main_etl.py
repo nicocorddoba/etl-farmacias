@@ -9,11 +9,11 @@ def flujo_carga_api(api_url:str, fb_url: str):
     logger = get_run_logger()
     
     logger.info("Starting data extraction")
-    response = scrap_data(url = fb_url)
+    image_bytes = scrap_data(url = fb_url)
     logger.info("Extracted data successfully")
     
     logger.info("Starting data transformation")
-    transformed_data = text_to_json(response)
+    transformed_data = text_to_json(image_bytes)
     logger.info("Transformed data successfully")
     
     logger.info("Starting data loading")

@@ -5,11 +5,10 @@ import re
 from datetime import datetime
 import json
 
-def image_to_text(response, logger):
+def image_to_text(image_bytes, logger):
     # Abrir imagen
-    image = response.body()
-    logger.info(f"Converting image to text {image}")
-    img = Image.open(image).convert("RGB")  # Asegurate que esté en modo RGB
+    logger.info(f"Converting image to text {image_bytes}")
+    img = Image.open(image_bytes).convert("RGB")  # Asegurate que esté en modo RGB
 
     # Crear una nueva imagen blanca del mismo tamaño
     new_img = Image.new("RGB", img.size, "white")
@@ -40,9 +39,9 @@ def image_to_text(response, logger):
     return text
 
 @task
-def text_to_json(response) -> json:
+def text_to_json(image_bytes) -> json:
     logger = get_run_logger()
-    text = image_to_text(response, logger)
+    text = image_to_text(image_bytes, logger)
     lineas = [l.strip() for l in text.replace("?", "°").splitlines() if l.strip()]
     data = []
 

@@ -73,10 +73,10 @@ def text_to_json(image_bytes) -> json:
 
         if nombre and fecha and direccion and telefono:
             data.append({
-                "fecha": fecha,
                 "nombre_farmacia": nombre.upper(),
                 "direccion_farmacia": direccion,
-                "numero_farmacia": telefono
+                "numero_farmacia": telefono,
+                "fecha": fecha
             })
 
         i += 2  # avanzar al siguiente par línea

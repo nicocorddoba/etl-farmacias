@@ -5,19 +5,33 @@ def launch_browser(chromium):
         "--disable-gpu",
         "--disable-dev-shm-usage",
         "--disable-software-rasterizer",
-        "--no-sandbox",
+        # "--no-sandbox",
         "--disable-extensions",
         "--disable-background-networking",
         "--disable-sync",
         "--disable-default-apps",
-        "--mute-audio",
+        "--mute-audio"
         # "--single-process" # Muy importante en instancias con poca RAM # DISCLAIMER: Parece cerrar el navegador
-        "--no-zygote"
+        # "--no-zygote"
     ])
     context = browser.new_context(
         user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Brave/114.0.0.0",
         viewport={"width": 1280, "height": 800},
-        locale="en-US"
+        locale="en-US",
+        extra_http_headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "es-ES,es;q=0.7",
+            "Cache-Control": "max-age=0",
+            "Sec-CH-UA": '""',
+            "Sec-CH-UA-Mobile": "?0",
+            "Sec-CH-UA-Platform": '""',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+            "Sec-GPC": "1",
+            "Upgrade-Insecure-Requests": "1"
+        }
     )
     
     return context, browser

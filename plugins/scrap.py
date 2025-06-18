@@ -32,7 +32,7 @@ def run(url: str, logger= None):
         page.wait_for_load_state("networkidle")
         logger.info(f"Page title: {page.title()}")
         html = page.content()
-        with open("debug_facebook.html", "w", encoding="utf-8") as f:
+        with open("/home/ubuntu/debug_facebook.html", "w", encoding="utf-8") as f:
             f.write(html)
             f.close()
         page.wait_for_selector("div[data-pagelet^='TimelineFeedUnit_']")

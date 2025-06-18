@@ -5,7 +5,7 @@ from tasks.transform import text_to_json
 from tasks.load import data_to_api
 
 @flow
-def flujo_etl_inmobiliario(api_url:str, fb_url: str):
+def flujo_carga_api(api_url:str, fb_url: str):
     logger = get_run_logger()
     
     logger.info("Starting data extraction")

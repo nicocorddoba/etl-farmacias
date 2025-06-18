@@ -80,6 +80,6 @@ def text_to_json(image_bytes) -> json:
             })
 
         i += 2  # avanzar al siguiente par línea
-
-    # Mostrar JSON resultante
-    return json.dumps(data, indent=2, ensure_ascii=False)
+    
+    logger.info(f"Extracted data: {data}")
+    return data

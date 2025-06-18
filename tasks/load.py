@@ -6,7 +6,6 @@ import json
 def data_to_api(data:json, api_url:str):
     try:
         logger = get_run_logger()
-        logger.info(f"posting this data: {data}")
         r = requests.post(url=api_url, json=data)
         logger.info(r.content)
         logger.info(r.status_code)

@@ -56,7 +56,7 @@ def run(url: str, logger) -> bytes:
         logger.info(f"Getting image response from {image_locator}")
         page.goto(image_locator)
         page.wait_for_load_state("networkidle")
-        src_url = page.locator("img[alt*='May be an image of text that says']").nth(0).get_attribute('src') # Link to the first image
+        src_url = page.locator("img[alt*='May be an image of text that says']").get_attribute('src') # Link to the first image
         # print(c)
         logger.info(f"Getting image response from {src_url}")
         response = context.request.get(src_url)

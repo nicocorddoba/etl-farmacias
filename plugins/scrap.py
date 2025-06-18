@@ -43,4 +43,3 @@ def run(url: str, logger= None):
         #     print(i)
         #     print(f.get_attribute("alt"))
         
-run("https://www.facebook.com/p/Farmacia-Martina-100057379122254/")

@@ -29,6 +29,8 @@ def run(url: str, logger= None):
         context, browser = launch_browser(chromium=chromium)
         page = context.new_page()
         page.goto(url)
+        page.wait_for_load_state("networkidle")
+        logger.info(f"Page title: {page.title()}")
         page.wait_for_selector("div[data-pagelet^='TimelineFeedUnit_']")
         image_locator = page.locator("a[href*='https://www.facebook.com/photo/?fbid=']").nth(1)
         # print(h.inner_html())

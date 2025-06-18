@@ -1,10 +1,12 @@
 from playwright.sync_api import sync_playwright, Page
+import os
 
-def fb_login(page: Page, context, fb_email: str, fb_password: str):
+def fb_login(page: Page, context):
     page.goto("https://www.facebook.com/login")
-    
-    page.fill('input[name="email"]', fb_email)
-    page.fill('input[name="pass"]', fb_password)
+    FB_EMAIL = os.getenv("FB_EMAIL")
+    FB_PASSWORD = os.getenv("FB_PASSWORD")
+    page.fill('input[name="email"]', FB_EMAIL)
+    page.fill('input[name="pass"]', FB_PASSWORD)
     page.click('button[name="login"]')
 
     # Esperar a que cargue algo del perfil
@@ -37,13 +39,13 @@ def launch_browser(chromium):
     
     return context, browser
 
-def run(url: str, logger, fb_email: str, fb_password: str) -> bytes:
+def run(url: str, logger) -> bytes:
     with sync_playwright() as playwright:
         logger.info("starting browser")
         chromium = playwright.chromium
         context, browser = launch_browser(chromium=chromium)
         page = context.new_page()
-        context = fb_login(page=page, context=context, fb_email=fb_email, fb_password=fb_password)
+        context = fb_login(page=page, context=context)
         page.goto(url)
         page.wait_for_load_state("networkidle")
         # html = page.content()

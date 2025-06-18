@@ -30,7 +30,10 @@ def run(url: str, logger= None):
         page = context.new_page()
         page.goto(url)
         page.wait_for_load_state("networkidle")
-
+        html = page.content()
+        with open("/home/ubuntu/debug_facebook.html", "w", encoding="utf-8") as f:
+            f.write(html)
+            f.close()
         page.wait_for_selector("div._aagv")
         image_locator = page.locator("img[alt*='Photo by Farmacia']").nth(0)
         # print(c)

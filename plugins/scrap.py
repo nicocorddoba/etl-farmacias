@@ -15,7 +15,7 @@ def launch_browser(chromium):
         "--no-zygote"
     ])
     context = browser.new_context(
-        user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64)...",
+        user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Brave/114.0.0.0",
         viewport={"width": 1280, "height": 800},
         locale="en-US"
     )

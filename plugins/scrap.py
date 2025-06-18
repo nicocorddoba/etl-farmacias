@@ -37,7 +37,7 @@ def run(url: str, logger= None):
         logger.info(f"Getting image response from {src_url}")
         response = context.request.get(src_url)
         image_bytes = response.body()
-        playwright.close()
+        browser.close()
     return image_bytes
         # for i in range(c.count()):
         #     f = c.nth(i)

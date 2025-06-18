@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 
 def launch_browser(chromium):
-    browser = chromium.launch(headless=True, args=[
+    browser = chromium.launch(headless=False, args=[
         "--disable-gpu",
         "--disable-dev-shm-usage",
         "--disable-software-rasterizer",

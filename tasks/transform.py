@@ -7,8 +7,8 @@ import json
 
 def image_to_text(response, logger):
     # Abrir imagen
-    image = response.body
-    logger.info(f"Converting image to text {img}")
+    image = response.body()
+    logger.info(f"Converting image to text {image}")
     img = Image.open(image).convert("RGB")  # Asegurate que esté en modo RGB
 
     # Crear una nueva imagen blanca del mismo tamaño

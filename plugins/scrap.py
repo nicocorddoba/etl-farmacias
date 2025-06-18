@@ -34,7 +34,7 @@ def run(url: str, logger= None):
         # print(h.inner_html())
         src_url = image_locator.locator("img[alt*='May be']").get_attribute('src')
         # print(c)
-        logger.info("Getting image response")
+        logger.info(f"Getting image response from {src_url}")
         response = context.request.get(src_url)
         browser.close()
     return response

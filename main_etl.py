@@ -5,11 +5,11 @@ from tasks.transform import text_to_json
 from tasks.load import data_to_api
 
 @flow
-def flujo_carga_api(api_url:str, fb_url: str, FB_EMAIL: str, FB_PASSWORD: str):
+def flujo_carga_api(api_url:str, fb_url: str, fb_email: str, fb_password: str):
     logger = get_run_logger()
     
     logger.info("Starting data extraction")
-    image_bytes = scrap_data(url = fb_url, FB_EMAIL=FB_EMAIL, FB_PASSWORD=FB_PASSWORD)
+    image_bytes = scrap_data(url = fb_url, fb_email=fb_email, fb_password=fb_password)
     logger.info("Extracted data successfully")
     
     logger.info("Starting data transformation")

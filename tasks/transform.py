@@ -4,11 +4,12 @@ import pytesseract
 import re
 from datetime import datetime
 import json
+from io import BytesIO
 
 def image_to_text(image_bytes, logger):
     # Abrir imagen
     logger.info(f"Converting image to text {image_bytes}")
-    img = Image.open(image_bytes).convert("RGB")  # Asegurate que esté en modo RGB
+    img = Image.open(BytesIO(image_bytes)).convert("RGB")  # Asegurate que esté en modo RGB
 
     # Crear una nueva imagen blanca del mismo tamaño
     new_img = Image.new("RGB", img.size, "white")

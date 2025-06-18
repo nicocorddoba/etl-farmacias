@@ -54,11 +54,9 @@ def run(url: str, logger) -> bytes:
         feed = page.locator("div[data-pagelet^='TimelineFeedUnit_']") # Select the feed
         image_locator = feed.locator("a[href*='https://www.facebook.com/photo/?fbid=']").nth(0).get_attribute('href') # Link to the first image publication
         logger.info(f"Getting image response from {image_locator}")
+        context = fb_login(page=page, context=context, logger= logger)
         page.goto(image_locator)
         page.wait_for_load_state("networkidle")
-        with open("/home/ubuntu/fb.html", "w") as f:
-            f.write(page.content())
-            f.close()
         src_url = page.locator("img[alt*='May be an image of text that says']").get_attribute('src') # Link to the first image
         # print(c)
         logger.info(f"Getting image response from {src_url}")

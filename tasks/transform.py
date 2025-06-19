@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 from io import BytesIO
 
-def image_to_text(image_bytes):
+def image_to_text(image_bytes, logger):
     # 1. Cargar imagen y convertir a RGB
     img = Image.open(BytesIO(image_bytes)).convert("RGB")
 
@@ -47,7 +47,7 @@ def image_to_text(image_bytes):
     # 7. OCR
     custom_config = r'--oem 3 --psm 11 -l spa'
     raw_text = pytesseract.image_to_string(binary, config=custom_config)
-
+    logger.info(f"Extracted text: {raw_text}")
     return raw_text
 
 @task
@@ -89,6 +89,6 @@ def text_to_dict(image_bytes) -> json:
             if "nombre_farmacia" in current and "direccion_farmacia" in current and "fecha" in current:
                 farmacias.append(current)
             current = {}
-
+    logger.info(f"Parsed farmacias: {farmacias}")
     # Mostrar resultado final
     return farmacias

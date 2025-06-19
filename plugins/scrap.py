@@ -9,8 +9,8 @@ def ig_login(page: Page, context, logger):
     page.wait_for_selector('input[name="username"]')
 
     # 3. Completar los campos
-    page.fill('input[name="username"]', USERNAME)
-    page.fill('input[name="password"]', PASSWORD)
+    page.fill('input[name="username"]', os.getenv("IG_USER"))
+    page.fill('input[name="password"]', os.getenv("FB_PASSWORD"))
 
     # 4. Hacer clic en "Iniciar sesión"
     page.click('button[type="submit"]')

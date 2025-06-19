@@ -1,86 +1,94 @@
 from prefect import task, get_run_logger
-from PIL import Image, ImageFilter
+import numpy as np
+from PIL import Image, ImageOps, ImageEnhance
 import pytesseract
 import re
 from datetime import datetime
 import json
 from io import BytesIO
 
-def image_to_text(image_bytes, logger):
-    # Abrir imagen
-    # logger.info(f"Converting image to text {image_bytes}")
-    img = Image.open(BytesIO(image_bytes)).convert("RGB")  # Asegurate que esté en modo RGB
+def image_to_text(image_bytes):
+    # 1. Cargar imagen y convertir a RGB
+    img = Image.open(BytesIO(image_bytes)).convert("RGB")
 
-    # Crear una nueva imagen blanca del mismo tamaño
-    new_img = Image.new("RGB", img.size, "white")
-
-    # Obtener píxeles
+    # 2. Eliminar fondo amarillo/naranja
+    clean = Image.new("RGB", img.size, "white")
     pixels = img.load()
-    pixels_nueva = new_img.load()
+    pixels_clean = clean.load()
 
-    # Reemplazar colores "amarillos" por blanco
     for y in range(img.height):
         for x in range(img.width):
             r, g, b = pixels[x, y]
-            # Umbral para detectar "amarillo claro"
-            if r > 230 and g > 130 and b < 40:
-                pixels_nueva[x, y] = (255, 255, 255)  # Blanco
+            if r > 180 and g > 130 and b < 110:  # Más estricto con el amarillo/naranja
+                pixels_clean[x, y] = (255, 255, 255)
             else:
-                pixels_nueva[x, y] = (r, g, b)  # Conservar original
+                pixels_clean[x, y] = (r, g, b)
 
-    # Convertir la nueva imagen a escala de grises
-    imagen = new_img.convert("L")
+    # 3. Convertir a escala de grises
+    gray = clean.convert("L")
 
-    # Filtros para mejorar detección de texto
-    imagen = imagen.filter(ImageFilter.MedianFilter())  # Suaviza ruido de fondo
+    # 4. Mejorar contraste y nitidez de bordes
+    gray = ImageOps.autocontrast(gray)
+    gray = ImageEnhance.Contrast(gray).enhance(1.8)  # Aumenta contraste aún más
 
-    # OCR
-    custom_config = r'--oem 3 --psm 6'  # o --psm 4/11 también puede probarse
-    text = pytesseract.image_to_string(imagen, lang="spa", config=custom_config)
-    logger.info(f"Extracted text: {text}")
-    return text
+    # 5. Redimensionar (clave para Tesseract)
+    scale = 2
+    resized = gray.resize(
+        (gray.width * scale, gray.height * scale),
+        resample=Image.LANCZOS
+    )
+
+    # 6. Binarización (umbral más fino)
+    np_img = np.array(resized)
+    threshold = 150  # Ligeramente más bajo para captar grises claros
+    binary_np = np.where(np_img > threshold, 255, 0).astype(np.uint8)
+    binary = Image.fromarray(binary_np)
+
+    # 7. OCR
+    custom_config = r'--oem 3 --psm 11 -l spa'
+    raw_text = pytesseract.image_to_string(binary, config=custom_config)
+
+    return raw_text
 
 @task
-def text_to_json(image_bytes) -> json:
+def text_to_dict(image_bytes) -> json:
     logger = get_run_logger()
+    # get text
     text = image_to_text(image_bytes, logger)
-    lineas = [l.strip() for l in text.replace("?", "°").splitlines() if l.strip()]
-    data = []
-
-    i = 0
-    while i < len(lineas) - 1:
-        linea_farmacia = lineas[i]
-        linea_detalle = lineas[i + 1]
-
-        # Buscar nombre farmacia
-        nombre_match = re.search(r"(FAR\.\s?.+)", linea_farmacia, re.IGNORECASE)
-        nombre = nombre_match.group(1).strip() if nombre_match else None
-
-        # Buscar fecha
-        fecha_match = re.search(r"(\d{2}/\d{2})", linea_detalle)
-        if fecha_match:
-            fecha_str = fecha_match.group(1) + "/2025"
-            fecha = datetime.strptime(fecha_str, "%d/%m/%Y").date().isoformat()
-        else:
-            fecha = None
-
-        # Buscar dirección
-        direccion_match = re.search(r"(DIRECCIÓN|DIRECION|DIR):\s*(.+?)\s*TELEFONO", linea_detalle, re.IGNORECASE)
-        direccion = direccion_match.group(2).strip() if direccion_match else None
-
-        # Buscar teléfono
-        telefono_match = re.search(r"TELEFONO[:\s]*([0-9\-]+)", linea_detalle)
-        telefono = telefono_match.group(1).strip() if telefono_match else None
-
-        if nombre and fecha and direccion and telefono:
-            data.append({
-                "nombre_farmacia": nombre.upper(),
-                "direccion_farmacia": direccion,
-                "numero_farmacia": telefono,
-                "fecha": fecha
-            })
-
-        i += 2  # avanzar al siguiente par línea
     
-    logger.info(f"Extracted data: {data}")
-    return data
+    # Transforming text to structured data
+    farmacias = []
+    lines = text.upper().replace("%", "°").splitlines()
+
+    current = {}
+    for i, line in enumerate(lines):
+        line = line.strip()
+        
+        # Detectar fecha
+        fecha_match = re.match(r"(\d{2})/(\d{2})", line)
+        if fecha_match:
+            current["fecha"] = f"2025-{fecha_match.group(2)}-{fecha_match.group(1)}"
+            continue
+
+        # Nombre farmacia
+        if line.startswith("FAR."):
+            current["nombre_farmacia"] = line
+            continue
+
+        # Dirección
+        if "DIR" in line.upper() or "DIRECION" in line.upper():
+            direccion = re.sub(r"(?i)^.*?dir\w*[:;]?", "", line).strip()
+            current["direccion_farmacia"] = direccion
+            continue
+
+        # Teléfono
+        if "TELEFONO" in line.upper():
+            numero = re.sub(r"(?i)telefono[:;]?", "", line).strip()
+            current["numero_farmacia"] = numero
+            # Cuando ya tenemos todo, guardamos y reiniciamos
+            if "nombre_farmacia" in current and "direccion_farmacia" in current and "fecha" in current:
+                farmacias.append(current)
+            current = {}
+
+    # Mostrar resultado final
+    return farmacias

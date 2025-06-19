@@ -1,7 +1,7 @@
 from prefect import flow, get_run_logger
 
 from tasks.extract import scrap_data
-from tasks.transform import text_to_json
+from tasks.transform import text_to_dict
 from tasks.load import data_to_api
 
 @flow
@@ -13,7 +13,7 @@ def flujo_carga_api(api_url:str, fb_url: str):
     logger.info("Extracted data successfully")
     
     logger.info("Starting data transformation")
-    transformed_data = text_to_json(image_bytes)
+    transformed_data = text_to_dict(image_bytes)
     logger.info("Transformed data successfully")
     
     logger.info("Starting data loading")

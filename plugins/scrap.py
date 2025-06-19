@@ -2,21 +2,30 @@ from playwright.sync_api import sync_playwright, Page
 import os
 import time
 
-def fb_login(page: Page, context, logger):
-    page.goto("https://www.facebook.com/login")
-    FB_EMAIL = os.getenv("FB_EMAIL")
-    FB_PASSWORD = os.getenv("FB_PASSWORD")
-    logger.info("Logging in to Facebook")
-    page.fill('input[name="email"]', FB_EMAIL)
-    page.fill('input[name="pass"]', FB_PASSWORD)
-    page.click('button[name="login"]')
-    logger.info("Waiting for Facebook to load after login")
+def ig_login(page: Page, context, logger):
+    page.goto("https://www.instagram.com/accounts/login/")
+
+    # 2. Esperar a que cargue el formulario
+    page.wait_for_selector('input[name="username"]')
+
+    # 3. Completar los campos
+    page.fill('input[name="username"]', USERNAME)
+    page.fill('input[name="password"]', PASSWORD)
+
+    # 4. Hacer clic en "Iniciar sesión"
+    page.click('button[type="submit"]')
+    
+
+    # 5. Esperar a que se redirija (perfil, feed, etc.)
+    page.wait_for_load_state("networkidle")
+    page.wait_for_timeout(10000)
+    logger.info("Waiting for Instagram to load after login")
     time.sleep(4)  # Esperar un poco para que la página cargue después del login
     # Esperar a que cargue algo del perfil
     # page.wait_for_selector('[role="navigation"]', timeout=10000)
 
     # Guardar sesión para usar después
-    context.storage_state(path="facebook_state.json")
+    context.storage_state(path="./instagram.json")
     return context
 
 
@@ -48,19 +57,19 @@ def run(url: str, logger) -> bytes:
         chromium = playwright.chromium
         context, browser = launch_browser(chromium=chromium)
         page = context.new_page()
-        context = fb_login(page=page, context=context, logger= logger)
+        context = ig_login(page=page, context=context, logger= logger)
         page.goto(url)
         page.wait_for_load_state("networkidle")
-        feed = page.locator("div[data-pagelet^='TimelineFeedUnit_']") # Select the feed
-        image_locator = feed.locator("a[href*='https://www.facebook.com/photo/?fbid=']").nth(0).get_attribute('href') # Link to the first image publication
+        feed = page.locator("div._aagu") # Select the feed
+        image_locator = feed.locator("img[alt*='Photo by Farmacia Martina']").nth(0).get_attribute('src') # Link to the first image publication
         logger.info(f"Getting image response from {image_locator}")
-        # context = fb_login(page=page, context=context, logger= logger)
-        page.goto(image_locator)
-        page.wait_for_load_state("networkidle")
-        src_url = page.locator("img[alt*='May be an image of text that says']").get_attribute('src') # Link to the first image
+        # # context = fb_login(page=page, context=context, logger= logger)
+        # page.goto(image_locator)
+        # page.wait_for_load_state("networkidle")
+        # src_url = page.locator("img[alt*='May be an image of text that says']").get_attribute('src') # Link to the first image
         # print(c)
-        logger.info(f"Getting image response from {src_url}")
-        response = context.request.get(src_url)
+        logger.info(f"Getting image response from {image_locator}")
+        response = context.request.get(image_locator)
         image_bytes = response.body()
         browser.close()
     return image_bytes

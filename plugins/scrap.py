@@ -37,8 +37,7 @@ def launch_browser(chromium):
     context = browser.new_context(
         user_agent="Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Brave/114.0.0.0",
         viewport={"width": 1280, "height": 800},
-        locale="en-US",
-        storage_state=os.getenv("FB_STORAGE_STATE")
+        locale="en-US"
     )
     
     return context, browser
@@ -49,7 +48,7 @@ def run(url: str, logger) -> bytes:
         chromium = playwright.chromium
         context, browser = launch_browser(chromium=chromium)
         page = context.new_page()
-        # context = fb_login(page=page, context=context, logger= logger)
+        context = fb_login(page=page, context=context, logger= logger)
         page.goto(url)
         page.wait_for_load_state("networkidle")
         feed = page.locator("div[data-pagelet^='TimelineFeedUnit_']") # Select the feed

@@ -3,14 +3,14 @@ import os
 import time
 
 def ig_login(page: Page, context, logger):
-    page.goto("https://www.instagram.com/accounts/login/")
+    page.goto("https://www.instagram.com/")
 
     # 2. Esperar a que cargue el formulario
     page.wait_for_selector('input[name="username"]')
 
     # 3. Completar los campos
-    page.fill('input[aria-label="username"]', os.getenv("FB_EMAIL"))
-    page.fill('input[aria-label="password"]', os.getenv("FB_PASSWORD"))
+    page.fill('input[name="username"]', os.getenv("FB_EMAIL"))
+    page.fill('input[name="password"]', os.getenv("FB_PASSWORD"))
 
     # 4. Hacer clic en "Iniciar sesión"
     page.click('button[type="submit"]')
